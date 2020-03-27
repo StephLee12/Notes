@@ -1,4 +1,11 @@
 - [Javascript Rookie Learning](#javascript-rookie-learning)
+  - [JS的同步和异步](#js%e7%9a%84%e5%90%8c%e6%ad%a5%e5%92%8c%e5%bc%82%e6%ad%a5)
+    - [JS的单线程](#js%e7%9a%84%e5%8d%95%e7%ba%bf%e7%a8%8b)
+    - [JS的同步 异步](#js%e7%9a%84%e5%90%8c%e6%ad%a5-%e5%bc%82%e6%ad%a5)
+    - [JS的异步机制](#js%e7%9a%84%e5%bc%82%e6%ad%a5%e6%9c%ba%e5%88%b6)
+    - [JS异步编程](#js%e5%bc%82%e6%ad%a5%e7%bc%96%e7%a8%8b)
+      - [回调函数](#%e5%9b%9e%e8%b0%83%e5%87%bd%e6%95%b0)
+      - [Promise](#promise)
   - [Quick Start](#quick-start)
     - [Basic Grammer](#basic-grammer)
       - [Case](#case)
@@ -13,6 +20,7 @@
       - [Define a function](#define-a-function)
       - [Function Domain](#function-domain)
       - [Method](#method)
+    - [Arrow Funtion](#arrow-funtion)
     - [Object](#object)
       - [Standard Object](#standard-object)
       - [Date](#date)
@@ -22,8 +30,159 @@
       - [DOM](#dom)
       - [Form(表单)](#form%e8%a1%a8%e5%8d%95)
       - [File](#file)
+      - [AJAX(Asynchronous JavaScript and XML)](#ajaxasynchronous-javascript-and-xml)
+  - [jQuery](#jquery)
+    - [Selector(选择器)](#selector%e9%80%89%e6%8b%a9%e5%99%a8)
+      - [Descendant Selector(层级选择器)](#descendant-selector%e5%b1%82%e7%ba%a7%e9%80%89%e6%8b%a9%e5%99%a8)
+      - [Find and Filt(查找和过滤)](#find-and-filt%e6%9f%a5%e6%89%be%e5%92%8c%e8%bf%87%e6%bb%a4)
+    - [jQuery_DOM](#jquerydom)
+    - [Event](#event)
+    - [AJAX](#ajax)
+  - [Error Handling](#error-handling)
+  - [underscore](#underscore)
+    - [Collections(集合类)](#collections%e9%9b%86%e5%90%88%e7%b1%bb)
+    - [underscore_array](#underscorearray)
+  - [Node.js](#nodejs)
+    - [Basic Module](#basic-module)
+      - [fs](#fs)
+      - [stream](#stream)
+      - [http](#http)
+      - [crypto](#crypto)
+    - [Web开发](#web%e5%bc%80%e5%8f%91)
+      - [koa](#koa)
+      - [Express](#express)
+      - [koa 1.0](#koa-10)
+      - [koa2](#koa2)
 
 # Javascript Rookie Learning
+
+## JS的同步和异步
+
+### JS的单线程
+
+👉 JS引擎是一个事件驱动的执行引擎，**事件驱动**和**计通中套接字的select好像**
+
+👉 JS是**单线程的**，即同一时间有多个任务，这些任务需要排队，前一个任务执行完才能执行下一个。
+
+```javascript
+// 同步代码
+function fun1() {
+  console.log(1);
+}
+function fun2() {
+  console.log(2);
+}
+fun1();
+fun2();
+
+// 输出
+1
+2
+```
+
+输出会依次输出1,2，代码依次执行，执行完``fun1()``,才会执行``fun2()``。但如果``fun1()``中的代码执行的是**读取文件或AJAX操作**(耗时)，这样会造成执行效率很低。
+
+但是JS单线程是必要的，作为浏览器的脚本语言，主要实现与用户的交互，可以对DOM进行操作。如果是多线程，一个线程要删除一个DOM结点，另一个线程要在该结点中添加内容，会出现矛盾。
+
+### JS的同步 异步
+
+👉 同步任务——**主线程上排队执行的任务，只有前一个任务执行完毕，才能继续执行下一个任务**。如打开网站时，网页的渲染过程，就是一个同步任务
+
+👉 异步任务——**不进入主线程，而进入任务队列的任务，只有任务队列通知主线程，某个异步任务可以执行了，且主线程空闲，该任务才会进入主线程**。如打开网站时，图片的加载，音乐的加载，就是异步任务。如下``setTimeout()``就是一个异步任务
+
+```javascript
+function fun1() {
+  console.log(1);
+}
+function fun2() {
+  console.log(2);
+}
+function fun3() {
+  console.log(3);
+}
+fun1();
+setTimeout(function(){
+  fun2();
+},0);
+fun3();
+
+// 输出
+1
+3
+2
+```
+
+### JS的异步机制
+
+👉上面说的任务队列，虽然任务会被加入进队列，**但任务不是先进先出的，因为先进的任务完成的时间可能晚于后进的任务**。实际上它是一个**事件队列**，当一个异步任务完成之后，在任务队列里添加一个事件(表示该异步任务完成)
+
+👉 如文件读取操作，这是一个异步任务，会被添加到任务队列，IO完成后，就会添加表示该异步任务完成的事件
+
+👉 某一异步任务对应的事件添加到队列后，就可以进行执行栈，但是主线程可能还在执行同步任务，只有当主线程空闲时，才会读取任务队列，**读取里面的事件，排在前面的事件会被优先处理**，如果该任务指定了回调函数，那么主线程处理该事件时，就会执行回调函数中的代码，
+
+👉 主线程在任务队列中读取任务是不断循环的，执行栈清空后，会在任务队列读取新任务，如果没有任务(是指该任务还没有被事件触发)，就会等待，直到有新的任务，称为**任务循环**，又因为每个任务都是由一个事件触发的，也称为**事件循环**
+
+### JS异步编程
+
+#### 回调函数
+
+👉 在使用AJAX时候用的很多
+
+```javascript
+var req = new XMLHttpRequest();
+req.open("GET",url);
+req.send(null);
+req.onreadystatechange=function(){}
+```
+
+``req.send()``方法是AJAX发送请求，是一个异步任务。``req.onreadystatechange()``是事件回调，借由``send()``方法发送请求得到响应之后触发的**请求完成事件**，将回调函数推入事件队列等待执行
+
+👉 但回调这种方法不太符合思考的链式(顺序)思维，会出现**回调地狱**
+
+#### Promise
+
+👉 [看B乎](https://zhuanlan.zhihu.com/p/26523836)
+
+👉 基本用法
+
+```javascript
+let p = new Promise((resolve, reject) => {
+  // 做一些事情
+  // 然后在某些条件下resolve，或者reject
+  if (/* 条件随便写^_^ */) {
+    resolve()
+  } else {
+    reject()
+  }
+})
+
+p.then(() => {
+    // 如果p的状态被resolve了，就进入这里
+}, () => {
+    // 如果p的状态被reject
+})
+```
+
+👉 第一段代码调用了``Promise``构造函数，第二段调用了``promise``实例的``then()``方法
+
+关于第一段代码
+
+- 构造函数接受一个函数作为参数
+- 调用构造函数得到实例``p``的同时，作为参数的函数会立即执行
+- 参数函数接收两个**回调函数的参数``resolve``和``reject``**
+- 在参数函数被执行的过程中，如果在其内部调用``resolve``,会将实例``p``的状态变成``fullfilled``，若调用的是``reject``,会将实例``p``的状态变成``rejected``
+
+关于第二段代码
+
+- 调用``then()``可以为实例``p``**注册两种状态函数
+- 当实例``p``的状态是``fullfilled``，触发第一个函数执行
+- 实例``p``的状态是``rejected``，触发第二个函数执行
+
+👉 基本工作模式
+
+- 将异步过程转化成``Promise``对象，对象有三种状态``pending fullfilled rejected``,初始的状态都是``pending``,而且只能由``pending``向其他两种状态转化
+- 通过``then()``注册状态的回调函数
+- 已完成的状态能够触发回调
 
 ## Quick Start
 
@@ -206,6 +365,17 @@ Array,Map都属于可迭代的类型
     };
     //age()就是一个方法
     att.age(); //调用
+```
+
+### Arrow Funtion
+
+👉 相当于匿名函数
+
+```javascript
+var fn = x => x* x; //等价于下面的函数
+function (x) {
+    return x * x;
+}
 ```
 
 ### Object
@@ -642,4 +812,1004 @@ function checkForm() {
 
 👉 当表单包含``file``控件时，表单的``enctype``必须指定为``multipart/form-data``,``method``必须指定为``post``
 
-👉 注意执行JavaScript总是单线程执行，执行多任务实际上都是**异步调用**
+👉 注意执行JavaScript总是单线程执行，执行多任务实际上都是**异步调用**。因为是异步操作，在JavaScript中不知道操作什么时候结束，因此要**设置一个回调函数**，当异步操作完成后，JavaScript引擎自动调用回调函数。[关于JS异步看此B乎](https://zhuanlan.zhihu.com/p/30630902) [也可看这个BLOG](https://www.cnblogs.com/Yellow-ice/p/10433423.html)
+
+#### AJAX(Asynchronous JavaScript and XML)
+
+👉 上文的链接。
+
+👉 写AJAX主要依靠``XMLHttpRequest``对象
+
+```javascript
+function success(text) {
+    var textarea = document.getElementById('test-response-text');
+    textarea.value = text;
+}
+
+function fail(code) {
+    var textarea = document.getElementById('test-response-text');
+    textarea.value = 'Error code: ' + code;
+}
+
+var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
+
+request.onreadystatechange = function () { // 状态发生变化时，函数被回调
+    if (request.readyState === 4) { // 成功完成
+        // 判断响应结果:
+        if (request.status === 200) {
+            // 成功，通过responseText拿到响应的文本:
+            return success(request.responseText);
+        } else {
+            // 失败，根据响应码判断失败原因:
+            return fail(request.status);
+        }
+    } else {
+        // HTTP请求还在继续...
+    }
+}
+
+// 发送请求:
+request.open('GET', '/api/categories');
+request.send();
+
+alert('请求已发送，请等待响应...');
+```
+
+👉 ``XMLHttpRequest``对象的``open()``方法有三个参数，第一个参数指定``GET``还是``POST``；第二个参数指定URL地址；第三个参数指定是否使用异步，默认是``true``
+
+👉 最后调用``send()``方法才**真正发送请求**，``GET``请求不需要参数，``POST``请求需要把body部分以字符串或``FormData``对象传进去
+
+👉 ``send()``方法是AJAX向服务器发送数据，**它是一个异步任务**，将请求交给浏览器的HTTP请求线程发起对服务器的请求，JS的主线程继续向下执行代码(如果执行栈中还有代码)
+
+👉 ``request.onreadystatechange``属于事件回调，在请求抢得到响应之后出发请求完成事件，将该事件添加到任务队列，当JS主线程空闲之后，会执行该事件的回调函数
+
+👉 当创建``XMLHttpRequest``对象后，要先设置``onreadystatechange``的回调函数。在回调函数中通过``readyState === 4``判断请求是否完成，如果已完成，再根据``status === 200``判断是否是一个成功的响应
+
+👉 上述代码中URL使用的是相对路径，如果改为``http://www.sina.com.cn/``,会报错，这是浏览器的**同源策略**导致的。默认情况下，JS在发送AJAX请求时，URL的域名必须和当前页面完全一致(域名相同(``www.example.com``和``example.com``不同)，协议相同(``http``和``https``不同)，端口相同(默认是``:80``端口)) 若想通过JS访问外域的URL，方法如下
+
+- **JSONP** 但是它只能用``GET``请求，并且要求返回JS。这种方法实际是利用了浏览器允许跨域引用JS资源。先准备好JSONP要调用的函数，然后给页面动态加一个``<script>``结点，相当于动态读取外域的JS资源，最后等着接收回调
+
+```javascript
+function refreshPrice(data) {
+    var p = document.getElementById('test-jsonp');
+    p.innerHTML = '当前价格：' +
+        data['0000001'].name +': ' +
+        data['0000001'].price + '；' +
+        data['1399001'].name + ': ' +
+        data['1399001'].price;
+}
+function getPrice() {
+    var
+        js = document.createElement('script'),
+        head = document.getElementsByTagName('head')[0];
+    js.src = 'http://api.money.126.net/data/feed/0000001,1399001?callback=refreshPrice';
+    head.appendChild(js);
+}
+```
+
+👉 但如果浏览器支持H5(现在没有浏览器不支持H5吧)，可以使用**CORS(Cross-Origin Resource Sharing)**,这是H5定义的如何跨域访问资源
+
+Origin表示浏览器当前页面的域。当JS向外域发起请求后，浏览器收到响应后，**首先检查``Access-Control-Allow-Origin``是否包含Origin。如果是，跨域请求成功；如果不是，请求失败
+
+所以，跨域能否成功，取决于**对方服务器是否给当前域一个``Access-Control-Allow-Origin``
+
+## jQuery
+
+👉 使用jQuery只需要在页面的``<head>``引入jQuery文件
+
+```html
+<html>
+<head>
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+    ...
+</body>
+</html>
+```
+
+👉 **\$符号**：jQuery把所有功能全部封装在一个**全局变量jQuery**中 ``$``是``jQuery``的别名
+
+### Selector(选择器)
+
+👉 jQuery的核心，类型``getElementById()``之类的，为了帮助我们快速定位到一个或多个DOM结点
+
+👉 按ID查找
+
+```javascript
+// 查找<div id="abc">:
+var div = $('#abc');
+```
+
+返回的对象是**jQuery对象**。以👆为例，如果``id``为``abc``的``<div>``存在，返回的jQuery对象如👇,如果不存在，返回``[]``
+
+```javascript
+[<div id="abc">...</div>]
+```
+
+jQuery对象和DOM对象之间可以相互转化，通常情况下使用jQuery对象更方便
+
+```javascript
+var div = $('#abc'); // jQuery对象
+var divDom = div.get(0); // 假设存在div，获取第1个DOM元素
+var another = $(divDom); // 重新把DOM包装为jQuery对象
+```
+
+👉 按tag查找 如查找所有``<p>``结点 ``var ps = $('p');``
+
+👉 按class查找 要在class名称前加一个``.`` 若同时查找包含``red``和``green``的结点  ``var a = $('.red.green')``
+
+👉 也可以按照其他属性查找
+
+#### Descendant Selector(层级选择器)
+
+👉 如果两个DOM元素由层级关系，可以用``$('ancestor descendant')来选择
+
+```html
+<!-- HTML结构 -->
+<div class="testing">
+    <ul class="lang">
+        <li class="lang-javascript">JavaScript</li>
+        <li class="lang-python">Python</li>
+        <li class="lang-lua">Lua</li>
+    </ul>
+</div>
+```
+
+若要选出``JavaScript``,``<div>``和``<ul>``都是``<li>``的祖先结点
+
+```javascript
+$('ul.lang li.lang-javascript'); // [<li class="lang-javascript">JavaScript</li>]
+$('div.testing li.lang-javascript'); // [<li class="lang-javascript">JavaScript</li>]
+```
+
+#### Find and Filt(查找和过滤)
+
+👉 查找
+
+```html
+<!-- HTML结构 -->
+<ul class="lang">
+    <li class="js dy">JavaScript</li>
+    <li class="dy">Python</li>
+    <li id="swift">Swift</li>
+    <li class="dy">Scheme</li>
+    <li name="haskell">Haskell</li>
+</ul>
+<script>
+var ul = $('ul.lang'); // 获得<ul>
+var dy = ul.find('.dy'); // 获得JavaScript, Python, Scheme
+var swf = ul.find('#swift'); // 获得Swift
+var hsk = ul.find('[name=haskell]'); // 获得Haskell
+</script>
+```
+
+### jQuery_DOM
+
+👉 修改Text和HTML
+
+```html
+<!-- HTML结构 -->
+<ul id="test-ul">
+    <li class="js">JavaScript</li>
+    <li name="book">Java &amp; JavaScript</li>
+</ul>
+<script>
+//get text and html
+var j1 = $('#test-ul li.js');
+var j2 = $('#test-ul li[name=book]');
+//set text and html
+j1.html('<span style="color: red">JavaScript</span>');
+j2.text('JavaScript & ECMAScript');
+</script>
+```
+
+👉 添加DOM
+
+用``append()`` ``prepend()``方法，先得到父结点，然后调用``append()``传入HTML片段
+
+```html
+<div id="test-div">
+    <ul>
+        <li><span>JavaScript</span></li>
+        <li><span>Python</span></li>
+        <li><span>Swift</span></li>
+    </ul>
+</div>
+<script>
+var ul = $('#test-div>ul');
+ul.append('<li><span>Haskell</span></li>');
+</script>
+```
+
+👉 删除DOM
+
+调用``remove()``方法
+
+### Event
+
+👉 在异步机制说过，一旦页面上的所有JavaScript代码被执行完后，就只能依赖**触发事件来执行JS代码**
+
+👉 浏览器在接收到用户的鼠标或键盘输入后，**会自动在对应的DOM结点上触发相应的事件**，如果该结点已经**绑定**了对应的**JS处理函数**，该函数就会自动调用,如👇绑定一个``click``
+事件
+
+```html
+<a id = "test-link" href="#0">嘤嘤嘤</a>
+
+<script>
+var a = $('test-link');
+a.click(function () {
+    alert('hello!');
+})
+</script>
+```
+
+👉 鼠标事件
+
+- ``click``：鼠标单击时触发
+- ``dblclick``: 鼠标双击时触发
+- ``mouseenter``: 鼠标进入时触发
+- ``mouseleave``：鼠标移出时触发
+- ``mousemove``：鼠标在DOM内部移动时触发
+- ``hover``: 鼠标进入和退出时触发两个函数
+
+👉 键盘事件——仅作用在当前焦点的DOM上 通常是``<input>``和``<textarea>``
+
+- ``keydown``: 键盘按下时触发
+- ``keyup``: 键盘松开时触发
+- ``keypress``: 按一次键后触发
+
+👉 其他事件
+
+- ``focus``: 当DOM获取焦点时触发
+- ``blur``: 当DOM失去焦点时触发
+- ``change``: 当``<input> <select>或<textarea>``的内容发生改变时触发
+- ``submit``: 当``<form>``提交时触发
+- ``ready``: 当页面被载入且DOM树完成初始化后触发
+
+``ready``仅作用于``document``对象，由于``ready``事件在DOM完成初始化后触发，且只触发一次，**所以非常适合写其他初始化代码**，如👇
+
+```html
+<html>
+<head>
+    <script>
+        $(document).ready(function () {
+            $('#testForm').submit(function() {
+                alert('submit!');
+            });
+        });
+    </script>
+</head>
+<body>
+    <form id = "testform"></form>
+</body>
+```
+
+上的JS代码甚至可以再简化为👇，这种写法最常见
+
+```javascript
+$(function () {
+    //init ....
+})
+```
+
+👉 取消绑定 ``off('event',function)``
+
+```javascript
+function hello() {
+    alert('hello!');
+}
+
+a.click(hello); // 绑定事件
+
+// 10秒钟后解除绑定:
+setTimeout(function () {
+    a.off('click', hello);
+}, 10000);
+```
+
+👉 事件触发条件
+
+事件的触发总是由用户操作引发，如监控文本框的内容改动👇
+
+```javascript
+var input = $('#test-input');
+input.change(function () {
+    console.log('changed...');
+});
+```
+
+当用户在文本框中输入，会触发``change``事件。但是！！！，如果用JS代码去改动文本框的值，不会触发``change``事件，如👇
+
+```javascript
+var input = $('#test-input');
+input.val('change it!'); // 无法触发change事件
+```
+
+可以这样改动，👇``input.change()``相当于``input.trigger('change')``
+
+```javascript
+var input = $('#test-input');
+input.val('change it!');
+input.change(); // 触发change事件
+```
+
+### AJAX
+
+👉 jQuery在全局对象``jQuery``中绑定了``ajax()``函数，可以处理AJAX请求。``ajax(url,settings)``函数需要接收一个URL和一个可选的对象。对象中选项如👇
+
+- ``async``: 是否异步执行AJAX请求，默认``true``
+- ``method``：缺省为``'GET'``,可指定为``'POST','PUT'``
+- ``contentType``：发送``POST``请求的格式
+- ``data``: 发送到数据
+- ``headers``:发送额外的HTTP头
+- ``dataType``: 接收数据的格式
+
+👉 jQuery的jqXHR对象类似一个Promise对象，如👇
+
+```javascript
+function ajaxLog(s) {
+    var txt = $('#test-response-text');
+    txt.val(txt.val() + '\n' + s);
+}
+
+$('#test-response-text').val('');
+var jqxhr = $.ajax('/api/categories', {
+    dataType: 'json'
+}).done(function (data) {
+    ajaxLog('成功, 收到的数据: ' + JSON.stringify(data));
+}).fail(function (xhr, status) {
+    ajaxLog('失败: ' + xhr.status + ', 原因: ' + status);
+}).always(function () {
+    ajaxLog('请求完成: 无论成功或失败都会调用');
+});
+```
+
+👉 ``get()``方法，👇
+
+```javascript
+var jqxhr = $.get('/path/to/resource', {
+    name: 'Bob Lee',
+    check: 1
+});
+```
+
+👉 ``post()``方法 👇
+
+```javascript
+var jqxhr = $.post('/path/to/resource', {
+    name: 'Bob Lee',
+    check: 1
+});
+```
+
+👉 ``getJSON()``方法来快速通过GET获取一个JSON对象
+
+```javascript
+var jqxhr = $.getJSON('/path/to/resource', {
+    name: 'Bob Lee',
+    check: 1
+}).done(function (data) {
+    // data已经被解析为JSON对象了
+});
+```
+
+## Error Handling
+
+👉 ``try...catch..finally`` 被``try {...}``包裹的代码块表示这部分代码执行中可能会发生错误，**一旦发生错误，就不执行后面的代码，转而跳到``catch``块``,``catch (e) {...}``包裹的代码就是错误处理代码，变量``e``表示捕获到的错误。``finally {...}``一定会被执行
+
+```javascript
+var r1, r2, s = null;
+try {
+    r1 = s.length; // 此处应产生错误
+    r2 = 100; // 该语句不会执行
+} catch (e) {
+    console.log('出错了：' + e);
+} finally {
+    console.log('finally');
+}
+console.log('r1 = ' + r1); // r1应为undefined
+console.log('r2 = ' + r2); // r2应为undefined
+```
+
+👉 程序可以主动抛出一个错误，用``throw``语句，让执行流程直接跳转到``catch``块
+
+```javascript
+var r, n, s;
+try {
+    s = prompt('请输入一个数字');
+    n = parseInt(s);
+    if (isNaN(n)) {
+        throw new Error('输入错误');
+    }
+    // 计算平方:
+    r = n * n;
+    console.log(n + ' * ' + n + ' = ' + r);
+} catch (e) {
+    console.log('出错了：' + e);
+}
+```
+
+👉 异步错误处理
+
+如👇，不会捕捉到错误
+
+```javascript
+function printTime() {
+    throw new Error();
+}
+
+try {
+    setTimeout(printTime, 1000);
+    console.log('done');
+} catch (e) {
+    console.log('error');
+}
+
+```
+
+## underscore
+
+👉 underscore提供一套完善的函数式编程接口
+
+👉 把自身绑定到唯一的全局变量``_``
+
+### Collections(集合类)
+
+👉 underscore为集合类(Array和Object)对象提供一致的接口
+
+👉 ``map() filter()``
+
+```javascript
+var obj = {
+    name: 'bob',
+    school: 'No.1 middle school',
+    address: 'xueyuan road'
+};
+
+var test = _.map(obj, function (key, value){
+    //..do something
+})
+```
+
+👉 ``some() every()`` 当集合中所有元素都满足条件``every()``返回``true``.当集合中至少一个元素满足条件``some()``返回``true``
+
+👉 ``max() min()`` 若作用于Object，则只对value有效
+
+👉 ``groupBy()`` 把集合的元素按照key归类
+
+```javascript
+var scores = [20, 81, 75, 40, 91, 59, 77, 66, 72, 88, 99];
+var groups = _.groupBy(scores, function (x) {
+    if (x < 60) {
+        return 'C';
+    } else if (x < 80) {
+        return 'B';
+    } else {
+        return 'A';
+    }
+});
+// 结果:
+// {
+//   A: [81, 91, 88, 99],
+//   B: [75, 77, 66, 72],
+//   C: [20, 40, 59]
+// }
+```
+
+### underscore_array
+
+👉 ``first() last()`` 分别取第一个和最后一个元素
+
+👉 ``flatten()`` 接收一个Array，将其变为一个一维数组
+
+👉 ``range()`` 快速生成一个序列
+
+## Node.js
+
+👉 在执行JS代码的时候，要以严格模式运行,可以在第一行写上``'use strict'``,也可直接在终端输入``node --use_strict file_name.js``
+
+👉 在Node环境中，一个js文件就称为一个模块(module)。模块名就是去掉``.js`` 👇是如何在一个模块中调用另一个模块的函数
+
+```javascript
+// hello.js
+'use strict';
+
+var s = 'Hello';
+
+function greet(name) {
+    console.log(s + ', ' + name + '!');
+}
+
+module.exports = greet;
+```
+
+注意，最后一行语句，要将函数``greet()``作为模块的输出暴露出去，这样别的模块就可以使用``greet()``函数
+
+```javascript
+'use strict';
+
+// 引入hello模块:
+var greet = require('./hello');
+
+var s = 'Michael';
+
+greet(s); // Hello, Michael!
+```
+
+引入模块用Node提供的``require``函数，👆 ``greet``就是hello.js文件中的``module.exports``
+
+这个模块加载机制称为**CommonJS规范**
+
+### Basic Module
+
+👉 Nodejs环境有一个唯一的全局对象``global``
+
+👉 ``process``对象代表当前Nodejs的进程
+
+#### fs
+
+👉 ``fs``模块是文件系统模块，负责读写文件
+
+👉 异步读取时，传入的回调函数接收两个参数 正常读取时 ``err===null``,``data``读取到的为String
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+//sample.txt文件必须在工作目录下，且文件编码是utf-8
+fs.readFile('sample.txt', 'utf-8', function (err, data) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(data);
+    }
+});
+```
+
+👉 当读取的文件不是文本文件，而是二进制文件，回调函数的``data``将返回一个``Buffer``对象。在Nodejs中，``Buffer``对象就是一个包含任意个子节的数组
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+fs.readFile('sample.png', function (err, data) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(data);
+        console.log(data.length + ' bytes');
+    }
+});
+```
+
+``Buffer``对象可以和String转换，如👇
+
+```javascript
+// Buffer -> String
+var text = data.toString('utf-8');
+console.log(text);
+
+// String -> Buffer
+var buf = Buffer.from(text, 'utf-8');
+console.log(buf);
+```
+
+👉 写文件 ``fs.writeFile()``实现，参数依次是文件名，数据和回调函数。如果传入的数据是String，默认按uft-8编码，如果传入参数是``Buffer``，写入的是二进制的文件
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+var data = 'Hello, Node.js';
+fs.writeFile('output.txt', data, function (err) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log('ok.');
+    }
+});
+```
+
+👉 获取文件大小，创建事件等信息 ``fs.stat()``
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+fs.stat('sample.txt', function (err, stat) {
+    if (err) {
+        console.log(err);
+    } else {
+        // 是否是文件:
+        console.log('isFile: ' + stat.isFile());
+        // 是否是目录:
+        console.log('isDirectory: ' + stat.isDirectory());
+        if (stat.isFile()) {
+            // 文件大小:
+            console.log('size: ' + stat.size);
+            // 创建时间, Date对象:
+            console.log('birth time: ' + stat.birthtime);
+            // 修改时间, Date对象:
+            console.log('modified time: ' + stat.mtime);
+        }
+    }
+});
+```
+
+#### stream
+
+👉 ``stream``是nodejs提供的仅在服务端可用的模块，是为了支持"流"这种数据结构
+
+👉 ``data``事件表示流的数据可以读取，``end``事件表示流已经到了末尾，没有数据可读，``error``事件表示出错。初始化一个读取流``fs.createReadStream('file','coding')``
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+// 打开一个流:
+var rs = fs.createReadStream('sample.txt', 'utf-8');
+
+rs.on('data', function (chunk) {
+    console.log('DATA:')
+    console.log(chunk);
+});
+
+rs.on('end', function () {
+    console.log('END');
+});
+
+rs.on('error', function (err) {
+    console.log('ERROR: ' + err);
+});
+```
+
+``data``事件可能会有很多次，每次传递的``chunk``是流的一部分数据
+
+👉 以流的形式写入文件，不断调用``write()``方法，最后以``end()``结束
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+var ws1 = fs.createWriteStream('output1.txt', 'utf-8');
+ws1.write('使用Stream写入文本数据...\n');
+ws1.write('END.');
+ws1.end();
+
+var ws2 = fs.createWriteStream('output2.txt');
+ws2.write(new Buffer('使用Stream写入二进制数据...\n', 'utf-8'));
+ws2.write(new Buffer('END.', 'utf-8'));
+ws2.end();
+```
+
+👉 ``pipe()``类似于linux中的管道，将数据从一个流输入到另一个流
+
+```javascript
+'use strict';
+
+var fs = require('fs');
+
+var rs = fs.createReadStream('sample.txt');
+var ws = fs.createWriteStream('copied.txt');
+
+rs.pipe(ws);
+```
+
+#### http
+
+👉 ``request``对象封装了HTTP请求，调用``request``对象的属性和方法就可以拿到所有**HTTP请求的信息**
+
+👉 ``response``对象封装了HTTP响应，操作``response``对象的方法，就可以把HTTP响应返回给浏览器 👇是一个HTTP服务器的程序,它对于所有请求，都返回``Hello World!``
+
+```javascript
+'use strict';
+
+// 导入http模块:
+var http = require('http');
+
+// 创建http server，并传入回调函数:
+var server = http.createServer(function (request, response) {
+    // 回调函数接收request和response对象,
+    // 获得HTTP请求的method和url:
+    console.log(request.method + ': ' + request.url);
+    // 将HTTP响应200写入response, 同时设置Content-Type: text/html:
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    // 将HTTP响应的HTML内容写入response:
+    response.end('<h1>Hello world!</h1>');
+});
+
+// 让服务器监听8080端口:
+server.listen(8080);
+
+console.log('Server is running at http://127.0.0.1:8080/');
+```
+
+之后在终端node环境下运行该js文件，之后打开浏览器输入``http://127.0.0.1:8080``即可看到``Hello World``
+
+👉 若要将上面的程序变为一个**文件服务器**，只需要解析``request.url``中的路径，然后再本地找到对应的文件，把文件内容发送即可
+
+解析URL要用到``url``模块，通过``parse()``将一个字符串解析为一个``url``对象
+
+```javascript
+'use strict';
+
+var url = require('url');
+
+console.log(url.parse('http://user:pass@host.com:8080/path/to/file?query=string#hash'));
+
+//解析结果如下
+Url {
+  protocol: 'http:',
+  slashes: true,
+  auth: 'user:pass',
+  host: 'host.com:8080',
+  port: '8080',
+  hostname: 'host.com',
+  hash: '#hash',
+  search: '?query=string',
+  query: 'query=string',
+  pathname: '/path/to/file',
+  path: '/path/to/file?query=string',
+  href: 'http://user:pass@host.com:8080/path/to/file?query=string#hash' }
+```
+
+处理本地文件目录要使用``path``模块,可以处理服务器端文件的路径
+
+```javascript
+'use strict';
+
+var path = require('path');
+
+// 解析当前目录:
+var workDir = path.resolve('.'); // '/Users/michael'
+
+// 组合完整的文件路径:当前目录+'pub'+'index.html':
+var filePath = path.join(workDir, 'pub', 'index.html');
+// '/Users/michael/pub/index.html'
+```
+
+完整的代码如👇，其中没必要手动读取文件内容，因为``response``对象是一个``Writable Stream``,直接用``pipe()``方法就实现了自动读取文件内容并输出到HTTP响应
+
+```javascript
+//file_server.js
+'use strict';
+
+var path = require('path');
+
+// 解析当前目录:
+var workDir = path.resolve('.'); // '/Users/michael'
+
+// 组合完整的文件路径:当前目录+'pub'+'index.html':
+var filePath = path.join(workDir, 'pub', 'index.html');
+// '/Users/michael/pub/index.html'
+```
+
+```javascript
+'use strict';
+
+var
+    fs = require('fs'),
+    url = require('url'),
+    path = require('path'),
+    http =  require('http');
+
+var root = path.resolve(process.argv[2] || '.'); //获取root目录(从命令行获取) 默认是当前目录 ||是比较运算符
+
+console.log('Static root dir: ' + root);
+
+var server = http.createServer(function (request , response) {
+    //获取URL的path
+    var path_name = url.parse(request.url).pathname;
+    //获取对应的本地文件路径
+    var filepath = path.join(root, pathname);
+    //获取文件状态
+    fs.stat(filepath, function (err, stats) {
+        if (!err && stats.isFile()) {
+            //没有报错且文件存在
+            console.log('200 '+ request.url);
+            //发送200响应
+            response.writeHead(200);
+            //将文件流导向response
+            fs.createReadStream(filepath).pipe(response);
+        } else{
+            //报错或文件不存在
+            console.log('404 ' + request.url);
+            //发送404响应
+            response.writeHead(404);
+            response.end('404 Not Found');
+        }
+    });
+});
+
+server.listen(8080);
+
+console.log('Server is running at http://127.0.0.1:8080');
+```
+
+👆要从命令行获取文件的目录，在终端node环境下输入``node file_server.js /path/to/dir``，其中``/path/to/dir``是存放文件的目录，只要在当前目录下存在文件``index.html``,在浏览器中输入``http://localhost:8080/index.html``,服务器就可以把文件内容发送给浏览器，控制台输出如👇
+
+```javascript
+200 /index.html
+200 /css/uikit.min.css
+200 /js/jquery.min.js
+200 /fonts/fontawesome-webfont.woff2
+```
+
+#### crypto
+
+👉 ``crypto``模块是提供通用的加密和哈希算法
+
+👉 MD5 SHA... 👇``'md5'``可以改成``'sha1' 'sha256'``等
+
+```javascript
+const crypto = require('crypto');
+
+const hash = crypto.createHash('md5');
+
+// 可任意多次调用update():
+hash.update('Hello, world!');
+hash.update('Hello, nodejs!');
+
+console.log(hash.digest('hex')); // 7e1977739c748beac0c0fd14fd26a544
+```
+
+### Web开发
+
+#### koa
+
+👉 koa是Express的下一代基于nodejs的web框架
+
+#### Express
+
+👉 对nodejs的http进行了封装，但是问题在于实现异步代码只有一个方法——回调。会出现回调地狱
+
+#### koa 1.0
+
+👉 使用generator实现异步
+
+#### koa2
+
+👉 koa2完全使用Promise且配合``async``和``await``实现异步
+
+👉 关于安装koa 在工作目录下 在终端执行``npm install koa@2.0.0``
+
+完整的用koa写的小程序👇
+
+```javascript
+// 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
+const Koa = require('koa');
+
+// 创建一个Koa对象表示web app本身:
+const app = new Koa();
+
+// 对于任何请求，app将调用该异步函数处理请求：
+app.use(async (ctx, next) => {
+    await next();
+    ctx.response.type = 'text/html';
+    ctx.response.body = '<h1>Hello, koa2!</h1>';
+});
+
+// 在端口3000监听:
+app.listen(3000);
+console.log('app started at port 3000...');
+```
+
+```javascript
+app.use(async (ctx, next) => {
+    await next();
+    var data = await doReadFile();
+    ctx.response.type = 'text/plain';
+    ctx.response.body = data;
+});
+```
+
+👉 由``async``标记的函数称为异步函数，在异步函数中，可以用``await``调用另一个异步函数
+
+👉 参数``ctx``是koa传入的封装了``request``和``response``的变量，``next``是koa传入的将要处理的下一个异步函数
+
+👉 每收到一个http请求，koa就会调用通过``app.use()``注册的``async``函数，并传入``ctx``和``next``参数
+
+👉 为什么在``async``函数中还要调用另一个异步函数``await next()`` 👇
+
+koa把很多``async``函数组成一个**处理链**，每个``async``函数都可以做自己要做的事情，然后用``await next()``来调用下一个``async``函数，把每个``async``函数称为**middleware**，这些middleware可以组合起来，如👇
+
+```javascript
+app.use(async (ctx, next) => {
+    console.log(`${ctx.request.method} ${ctx.request.url}`); // 打印URL
+    await next(); // 调用下一个middleware
+});
+
+app.use(async (ctx, next) => {
+    const start = new Date().getTime(); // 当前时间
+    await next(); // 调用下一个middleware
+    const ms = new Date().getTime() - start; // 耗费时间
+    console.log(`Time: ${ms}ms`); // 打印耗费时间
+});
+
+app.use(async (ctx, next) => {
+    await next();
+    ctx.response.type = 'text/html';
+    ctx.response.body = '<h1>Hello, koa2!</h1>';
+});
+```
+
+👉 👆👆的koa2小程序，输入任何的URL，都会返回相同的网页，其实应该对不同的URL调用不同的处理函数
+
+👉 引入了``koa-router``这个middleware，负责URL的映射 用``npm install koa-router``
+
+```javascript
+const Koa  =require('koa');
+
+// 若只是require('koa-router') 返回的是函数
+const router = require('koa-router')();
+
+const app = new Koa();
+
+// log request URL:
+app.use(async (ctx, next) => {
+    console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
+    await next();
+});
+
+// add url-route
+router.get('/hello/:name', async (ctx, next) => {
+    var name = ctx.params.name;
+    ctx.response.body = `<h1>Hello, ${name}!</h1>`;
+});
+
+router.get('/', async (ctx, next) => {
+    ctx.response.body = `<h1>Index</h1>`;
+});
+
+// add router middleware:
+app.use(router.routes());
+
+app.listen(3000);
+console.log('app started at port 3000...');
+```
+
+👉 使用``router.get('/path', async fn)``来注册一个GET请求。可以在请求路径中使用带变量的``/hello/:name``，变量可以通过``ctx.params.name``访问
+
+👉 处理post请求
+
+👆 ``router.get('/path',async fn)``处理的是get请求，若要处理post请求，用``router.post('/path', async fn)``
+
+post请求通常会发送一个表单，或者JSON，它作为request的body发送，但是nodejs提供的原始request对象，还是koa提供的request对象，都不提供解析request的body的功能，👇
+
+引入另一个middleware来解析原始request请求，然后把解析后的参数，绑定到``ctx.request.body``上，👉``koa-bodyparser`` 安装——``npm install koa-bodyparser``
+
+middleware的顺序很重要，``koa-bodyparser``必须在``router``之前被注册到``app``对象上
+
+下面是一段处理post请求的代码
+
+```javascript
+router.get('/', async (ctx, next) => {
+    ctx.response.body = `<h1>Index</h1>
+        <form action="/signin" method="post">
+            <p>Name: <input name="name" value="koa"></p>
+            <p>Password: <input name="password" type="password"></p>
+            <p><input type="submit" value="Submit"></p>
+        </form>`;
+});
+
+router.post('/signin', async (ctx, next) => {
+    var
+        name = ctx.request.body.name || '',
+        password = ctx.request.body.password || '';
+    console.log(`signin with name: ${name}, password: ${password}`);
+    if (name === 'koa' && password === '12345') {
+        ctx.response.body = `<h1>Welcome, ${name}!</h1>`;
+    } else {
+        ctx.response.body = `<h1>Login failed!</h1>
+        <p><a href="/">Try again</a></p>`;
+    }
+});
+```
+
+类似的，put,delete,head请求也可以由``router``处理
