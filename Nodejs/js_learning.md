@@ -53,6 +53,9 @@
       - [Express](#express)
       - [koa 1.0](#koa-10)
       - [koa2](#koa2)
+        - [Handling URL](#handling-url)
+        - [Nunjucks](#nunjucks)
+        - [MVC(Modek-View-Controller)](#mvcmodek-view-controller)
 
 # Javascript Rookie Learning
 
@@ -1739,6 +1742,8 @@ app.use(async (ctx, next) => {
 });
 ```
 
+##### Handling URL
+
 👉 👆👆的koa2小程序，输入任何的URL，都会返回相同的网页，其实应该对不同的URL调用不同的处理函数
 
 👉 引入了``koa-router``这个middleware，负责URL的映射 用``npm install koa-router``
@@ -1813,3 +1818,29 @@ router.post('/signin', async (ctx, next) => {
 ```
 
 类似的，put,delete,head请求也可以由``router``处理
+
+👉 但如上的方式，太乱了。对代码进行重构。添加一个Controller Middleware 要看代码！！
+
+##### Nunjucks
+
+👉 模板引擎——基于模板配合数据构造出字符串输出的一个组件
+
+如👇就是一个模板引擎
+
+```javascript
+function examResult (data) {
+    return `${data.name}同学一年级期末考试语文${data.chinese}分，数学${data.math}分，位于年级第${data.ranking}名。`
+}
+```
+
+模板引擎最常见的输出就是输出网页
+
+##### MVC(Modek-View-Controller)
+
+👉 当用户通过浏览器请求一个URL时，koa将调用某个异步函数处理URL，在这个异步函数内部，用``ctx.render('home.html', { name: 'Michael' });``,通过Nunjucks把数据用指定模板渲染成HTML，然后输出给浏览器，如👇图所示![3](Captures\3.PNG "3")
+
+👉 MVC中异步函数是C，负责业务逻辑，如见擦汗用户名是否存在，取出用户信息
+
+👉 包含变量``{{ name }}``的模板就是V，负责显示逻辑，通过简单地替换一些变量，View最终输出的就是用户看到的HTML
+
+👉 Model是用来传给View，View在替换变量时，从Model中取出相应的数据，👆中Model就是JS对象``{name :'Michael'}``
