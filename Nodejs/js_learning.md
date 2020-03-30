@@ -1,4 +1,4 @@
-- [Javascript Rookie Learning](#javascript-rookie-learning)
+- [JavaScript Rookie Learning](#javascript-rookie-learning)
   - [JS的同步和异步](#js%e7%9a%84%e5%90%8c%e6%ad%a5%e5%92%8c%e5%bc%82%e6%ad%a5)
     - [JS的单线程](#js%e7%9a%84%e5%8d%95%e7%ba%bf%e7%a8%8b)
     - [JS的同步 异步](#js%e7%9a%84%e5%90%8c%e6%ad%a5-%e5%bc%82%e6%ad%a5)
@@ -50,14 +50,20 @@
       - [crypto](#crypto)
     - [Web开发](#web%e5%bc%80%e5%8f%91)
       - [koa](#koa)
-      - [Express](#express)
-      - [koa 1.0](#koa-10)
-      - [koa2](#koa2)
-        - [Handling URL](#handling-url)
-        - [Nunjucks](#nunjucks)
-        - [MVC(Modek-View-Controller)](#mvcmodek-view-controller)
+        - [Express](#express)
+        - [koa 1.0](#koa-10)
+        - [koa2](#koa2)
+          - [Handling URL](#handling-url)
+          - [Nunjucks](#nunjucks)
+          - [MVC(Modek-View-Controller)](#mvcmodek-view-controller)
+      - [mysql](#mysql)
+      - [Use ORM Sequelize](#use-orm-sequelize)
+      - [Build Model](#build-model)
+    - [WebSocket](#websocket)
+    - [REST(Representational State Transfer)](#restrepresentational-state-transfer)
+      - [Write REST API](#write-rest-api)
 
-# Javascript Rookie Learning
+# JavaScript Rookie Learning
 
 ## JS的同步和异步
 
@@ -1668,15 +1674,15 @@ console.log(hash.digest('hex')); // 7e1977739c748beac0c0fd14fd26a544
 
 👉 koa是Express的下一代基于nodejs的web框架
 
-#### Express
+##### Express
 
 👉 对nodejs的http进行了封装，但是问题在于实现异步代码只有一个方法——回调。会出现回调地狱
 
-#### koa 1.0
+##### koa 1.0
 
 👉 使用generator实现异步
 
-#### koa2
+##### koa2
 
 👉 koa2完全使用Promise且配合``async``和``await``实现异步
 
@@ -1742,7 +1748,7 @@ app.use(async (ctx, next) => {
 });
 ```
 
-##### Handling URL
+###### Handling URL
 
 👉 👆👆的koa2小程序，输入任何的URL，都会返回相同的网页，其实应该对不同的URL调用不同的处理函数
 
@@ -1821,7 +1827,7 @@ router.post('/signin', async (ctx, next) => {
 
 👉 但如上的方式，太乱了。对代码进行重构。添加一个Controller Middleware 要看代码！！
 
-##### Nunjucks
+###### Nunjucks
 
 👉 模板引擎——基于模板配合数据构造出字符串输出的一个组件
 
@@ -1835,7 +1841,9 @@ function examResult (data) {
 
 模板引擎最常见的输出就是输出网页
 
-##### MVC(Modek-View-Controller)
+###### MVC(Modek-View-Controller)
+
+[多看几遍](https://www.liaoxuefeng.com/wiki/1022910821149312/1023026038570336)
 
 👉 当用户通过浏览器请求一个URL时，koa将调用某个异步函数处理URL，在这个异步函数内部，用``ctx.render('home.html', { name: 'Michael' });``,通过Nunjucks把数据用指定模板渲染成HTML，然后输出给浏览器，如👇图所示![3](Captures\3.PNG "3")
 
@@ -1844,3 +1852,301 @@ function examResult (data) {
 👉 包含变量``{{ name }}``的模板就是V，负责显示逻辑，通过简单地替换一些变量，View最终输出的就是用户看到的HTML
 
 👉 Model是用来传给View，View在替换变量时，从Model中取出相应的数据，👆中Model就是JS对象``{name :'Michael'}``
+
+👉 处理首页GET / 在``./controller/index.js``中
+
+```javascript
+async (ctx, next) => {
+    ctx.render('index.html', {
+        title: 'Welcome'
+    });
+}
+```
+
+👉 处理登录请求 POST/signin
+
+```javascript
+async (ctx, next) => {
+    var
+        email = ctx.request.body.email || '',
+        password = ctx.request.body.password || '';
+    if (email === 'admin@example.com' && password === '123456') {
+        // 登录成功:
+        ctx.render('signin-ok.html', {
+            title: 'Sign In OK',
+            name: 'Mr Node'
+        });
+    } else {
+        // 登录失败:
+        ctx.render('signin-failed.html', {
+            title: 'Sign In Failed'
+        });
+    }
+}
+```
+
+登录成功时用``signin_ok.html``渲染，登录失败用``signin_failed.html``渲染。所以在``./view``中需要三个View：``index.html signin_ok.html signin_failed.html``
+
+👉 编写View实际上就是写HTML，直接使用一个现成的框架——Bootstrap，将所有静态资源文件放到``./static``目录下。
+
+所以需要一个middleware来处理以``/static/``开头的URL
+
+``./static_file.js``中的``staticFiles``函数接收两个参数:URL前缀和一个目录，然后返回一个``async``函数，该函数会判断当前URL是否以指定前缀开头，如果是就发送文件内容。如果不是，这个函数不做事情，只是调用``await next()``——让下一个middleware去处理请求
+
+使用处理静态文件的middleware只需在``app.js``中加上
+
+```javascript
+let staticFiles = require('./static-files');
+app.use(staticFiles('/static/', __dirname + '/static'));
+```
+
+👉 集成Nunjucks也是编写一个middleware，这个middleware的作用是给``ctx``对象绑定一个``render(view, model)``的方法，之后Controller就可以调用这个方法来渲染模板。``./templating.js``实现这个middleware
+
+在``app.js``中添加如下代码
+
+```javascript
+const isProduction = process.env.NODE_ENV === 'production';
+
+app.use(templating('views', {
+    noCache: !isProduction,
+    watch: !isProduction
+}));
+```
+
+定义了一个常量``isProduction``,判断当前环境是否是production环境。如果是，就使用缓存；如果不是，就关闭缓存。**在开发环境下，关闭缓存后，若修改View，可以直接刷新浏览器看到效果。否则，每次修改都要重启Node，会降低开发效率**
+
+在全局变量``process``中定义了一个环境变量``NODE_ENV``。使用此变量是因为在开发环境下，该值应设置为``development``,部署到服务器，环境变量应设置为``'production'``。注意，**生产环境必须配置此变量，而开发环境不需要**
+
+来编写处理静态文件的middleware时，可以如下编写
+
+```javascript
+if (! isProduction) {
+    let staticFiles = require('./static-files');
+    app.use(staticFiles('/static/', __dirname + '/static'));
+}
+```
+
+这是因为在生产环境下，静态文件是由反向代理服务器(如Nginx)处理的，Node不需要处理。但是在**开发环境，我们希望koa能顺带处理静态文件，否则就要手动配置一个反向代理服务器**
+
+👉 上面说过需要3个Views，可以编写一个``base.html``作为骨架，其他模板都继承``base.html``
+
+👉 编写Middleware的时候要注意middleware的顺序。在示例工程``view_koa``中
+
+- 第一个middleware是记录URL以及页面的执行时间
+
+```javascript
+app.use(async (ctx, next) => {
+    console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
+    var
+        start = new Date().getTime(),
+        execTime;
+    await next();
+    execTime = new Date().getTime() - start;
+    ctx.response.set('X-Response-Time', `${execTime}ms`);
+});
+```
+
+- 第二个处理静态文件
+
+```javascript
+if (! isProduction) {
+    let staticFiles = require('./static-files');
+    app.use(staticFiles('/static/', __dirname + '/static'));
+}
+```
+
+- 第三个解析post请求
+
+```javascript
+app.use(bodyParser());
+```
+
+- 第四个为``ctx``绑定``render()``方法，以使用Nunjucks
+
+```javascript
+app.use(templating('view', {
+    noCache: !isProduction,
+    watch: !isProduction
+}));
+```
+
+- 最后一个middleware处理URL路由
+
+```javascript
+app.use(controller());
+```
+
+#### mysql
+
+👉 对于nodejs程序，访问mysql是通过网络发送SQL命令给mysql服务器，**访问mysql服务器的软件包称为mysql的驱动程序**，可以直接用``npm install mysql``安装
+
+#### Use ORM Sequelize
+
+👉 数据库是一个二维表，**每一行可以用一个JS对象表示**。这就是**ORM(Object-Relational Mapping)技术**——把关系数据库的表结构映射到对象上。ORM框架用来做这种转换
+
+👉 选择Node的ORM框架**Sequelize**，可以将JS对象变换为数据库中的行
+
+👉 若要查询某一个表，如``pets``表
+
+```javascript
+(async ()=> {
+    var pets = await Pet.findAll();
+})
+```
+
+👉 由于mysql各版本语法的不同，创建用户用``create user 'stephlee'@'localhost' identified by 'password';``,然后将``test``数据库授权给用户(若无``test``数据库 执行``create database test``)，执行``grant all privileges on test.* to 'stephlee'@'localhost';``
+
+👉 先将工作目录下的``init,txt``复制到mysql命令行执行，然后执行``app.js``,工作目录下的``config.js``是一个配置文件
+
+👉 实现
+
+- 在``app.js``中先创建一个``sequelize``对象实例
+
+```javascript
+const Sequelize = require('sequelize');
+const config = require('./config');
+
+var sequelize = new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
+    dialect: 'mysql',
+    pool: {
+        max: 5,
+        min: 0,
+        idle: 30000
+    }
+});
+```
+
+- 然后定义模型``Pet``，告诉``Sequelize``如何映射数据库表.用``sequelize.define()``定义Model
+
+```javascript
+var Pet = sequelize.define('pet', {
+    id: {
+        type: Sequelize.STRING(50),
+        primaryKey: true
+    },
+    name: Sequelize.STRING(100),
+    gender: Sequelize.BOOLEAN,
+    birth: Sequelize.STRING(10),
+    createdAt: Sequelize.BIGINT,
+    updatedAt: Sequelize.BIGINT,
+    version: Sequelize.BIGINT
+}, {
+        timestamps: false
+    });
+```
+
+- 向数据库中添加数据
+
+```javascript
+(async () => {
+    var dog = await Pet.create({
+        id: 'd-' + now,
+        name: 'Odie',
+        gender: false,
+        birth: '2008-08-08',
+        createdAt: now,
+        updatedAt: now,
+        version: 0
+    });
+    console.log('created: ' + JSON.stringify(dog));
+})();
+```
+
+- 查询数据
+
+```javascript
+(async () => {
+    var pets = await Pet.findAll({
+        where: {
+            name: 'Gaffey'
+        }
+    });
+    console.log(`find ${pets.length} pets:`);
+    for (let p of pets) {
+        console.log(JSON.stringify(p));
+    }
+})();
+```
+
+- 更新数据和删除数据分别调用``save()``和``destroy()``方法，详见代码
+
+#### Build Model
+
+👉 一个统一的模型，强迫所有Model都遵守同一个风格
+
+👉 Rules
+
+- Models存放的文件夹必须在``models``内，并且以Model名字命名
+- 统一主键，名称必须是``id``,类型必须是``STRING(50)``
+- 所有字段默认为``NOT NULL``
+- 统一timestamp机制，每个Model必须有``createdAt updatedAt version``，分别记录创建时间，修改时间和版本号。前两个以``BIGINT``存储时间戳，``version``每次修改时自增
+
+👉 About mysql
+
+- 查看所有数据库``show databases``
+- 查看用户``select host,user from mysql.user``
+- 查看数据库中的表——``show tables``
+- 查看表中的所有内容——``select * from table_name``
+
+### WebSocket
+
+👉 无限制的全双工通信
+
+- WebSocket是利用HTTP协议来建立连接，连接必须**由浏览器发起**，格式如下
+
+```txt
+GET ws://localhost:3000/ws/chat HTTP/1.1
+Host: localhost
+Upgrade: websocket
+Connection: Upgrade
+Origin: http://localhost:3000
+Sec-WebSocket-Key: client-random-string
+Sec-WebSocket-Version: 13
+```
+
+GET请求的地址是以``ws://``开头的地址，请求头``Upgrade:websocket Connection:Upgrade``表示这个连接要被转换为WebSocket连接
+
+- 如果服务器接收该请求，返回如下相应
+
+```txt
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: server-random-string
+```
+
+响应代码``101``表示本次连接的HTTP协议即将被更改，更改后的协议就是``Upgrade``指定的WebSocket协议
+
+### REST(Representational State Transfer)
+
+👉 Web API的标准
+
+👉 什么是Web API?
+
+如果我们想要获取某个电商网站的某个商品，输入``http://localhost:3000/products/123``，就可以看到id为123的商品页面，但这个结果是HTML页面，它**同时混合包含了Product的数据和Product的展示两个部分**。对于用户来说，阅读起来没有问题，但是，如果机器读取，就**很难从HTML中解析出Product的数据**。
+
+如果一个URL返回的不是HTML，而是**机器能直接解析的数据**，这个URL就可以看成一个Web API
+
+所以REST就是一种设计API的模式，最常用的数据格式是JSON
+
+#### Write REST API
+
+👉 编写REST API，实际上就是编写处理HTTP请求的``async``函数，但是REST请求与普通的HTTP请求不同的是：
+
+- 除GET请求外，其他请求``body``的格式是JSON格式，因此请求的``Content-Type``为``application/json``
+- REST响应返回的结果是JSON格式，因此响应的``Content-Type``也是``application/json``
+
+![4](Captures\4.PNG "4")
+
+👉 用koa处理REST
+
+在koa中处理REST请求是非常简单的。``bodyParser()``这个middleware可以解析请求的JSON数据并绑定到``ctx.request.body``上，输出JSON时我们先指定``ctx.response.type = 'application/json'``，然后把JavaScript对象赋值给``ctx.response.body``就完成了REST请求的处理。
+
+👉 如何组织URL
+
+以固定的前缀区分，``/static/``开头的URL是静态资源文件，``/api/``开头的URL是REST API，其他的URL是普通的MVC请求
+
+👉 统一输出REST
+
+参考集成Nunjucks，通过一个middleware给``ctx``添加一个方法，这里同样这样做——添加一个``rest()``方法
