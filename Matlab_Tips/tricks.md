@@ -29,3 +29,7 @@ a+(b-a)*rand(m,n);
 ```matlab
 new_x  = cumsum(x)
 ```
+
+👉 一维插值``interp1`` 二维插值(对于网格结点数据)``interp2`` 散点插值``griddata``
+
+👉 多项式拟合``polyfit`` 最小二乘拟合``lsqcurvefit lsqnonlin``
