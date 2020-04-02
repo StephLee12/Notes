@@ -14,6 +14,14 @@
     - [State-Action Value Funtion——Q Function $\,Q^\pi (s,a)\,$](#state-action-value-funtionq-function-mathsemanticsmrowmtext-mtextmsupmiqmimi%cf%80mimsupmo-stretchy%22false%22momismimo-separator%22true%22momiamimo-stretchy%22false%22momtext-mtextmrowannotation-encoding%22applicationx-tex%22qpi-saannotationsemanticsmathq%cf%80sa)
     - [Tricks](#tricks)
     - [Q-Learning Algorithm](#q-learning-algorithm)
+    - [Q-Learning Tips](#q-learning-tips)
+      - [Double DQN](#double-dqn)
+      - [Dueling DQN](#dueling-dqn)
+      - [Prioritized Reply](#prioritized-reply)
+      - [Multi-Step](#multi-step)
+      - [Noisy Net](#noisy-net)
+    - [Q-Learning for Continuous Action](#q-learning-for-continuous-action)
+  - [Actor Critic](#actor-critic)
 
 # Reinforcement Learning 李宏毅
 
@@ -304,6 +312,50 @@ BUFFER里的数据来自不同的policy，得到的batch的数据会比较多样
 
 ### Q-Learning Algorithm
 
-![RL19](Captures\RL19.PNG "RL19")
+![RL20](Captures\RL20.PNG "RL20")
 
 与环境交互得到很多个experience放入buffer后，sample数据按照target network的方法做拟合处理
+
+### Q-Learning Tips
+
+#### Double DQN
+
+👉 Q Value 常常是被高估的 所以在update的Q network算出来的值用target network再算一遍 ![RL21](Captures\RL21.PNG "RL21")
+
+#### Dueling DQN
+
+![RL22](Captures\RL22.PNG "RL22")
+
+👉 将输出的Q值分解为一个标量$\,V(s)\,$和一个向量$\,A(s,a)\,$,当需要更新Q值的时候，不需要更新$\,A(s,a)\,$,而是直接更新$\,V(s)\,$，这样会更有效率。
+
+👉 但是会出现$\,V(s)\,$全是0的情况，此时Q值就是$\,A(s,a)\,$，为了防止这种情况的出现，要对$\,A(s,a)\,$和$\,V(s)\,$加一些约束，一种约束是$\,V(s)\,$是column的平均值，$\,A(s,a)\,$的列求和为0，如👇![RL23](Captures\RL23.PNG "RL23")
+
+👉 $\,A(s,a)\,$的值必须是Normalize之后的，每一个数减去 (列求和/列元素的个数)
+
+#### Prioritized Reply
+
+存入Reply Buffer的数据中 TD Error较大的数据被选取的概率较大
+
+#### Multi-Step
+
+更新Q值时，target不是下一步的，而是下N步的，可以认为是TD和MC的组合
+
+#### Noisy Net
+
+之前的**Epsilon Greedy**是对action加噪
+
+在每个episode**开始前**，可以对Q-function的参数加噪
+
+### Q-Learning for Continuous Action
+
+$$
+    a = arg \,\max \limits_{a} Q(s,a)\\
+$$
+
+👉 采样一些action,取Q值最大的action
+
+👉 用梯度上升去解决这个优化的问题，不断optimize action
+
+👉 设计一个网络来解决![RL24](Captures\RL24.PNG "RL24")
+
+## Actor Critic
