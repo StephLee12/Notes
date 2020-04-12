@@ -21,7 +21,12 @@
       - [Multi-Step](#multi-step)
       - [Noisy Net](#noisy-net)
     - [Q-Learning for Continuous Action](#q-learning-for-continuous-action)
-  - [Actor Critic](#actor-critic)
+  - [A3C(Asychronous Advantage Actor-Critic)](#a3casychronous-advantage-actor-critic)
+    - [Review](#review)
+    - [Advantage Actor-Critic (A2C)](#advantage-actor-critic-a2c)
+    - [Pathwise Derivative Policy Gradient](#pathwise-derivative-policy-gradient)
+  - [Sparse Reward](#sparse-reward)
+  - [Imitaion Learning](#imitaion-learning)
 
 # Reinforcement Learning 李宏毅
 
@@ -358,4 +363,60 @@ $$
 
 👉 设计一个网络来解决![RL24](Captures\RL24.PNG "RL24")
 
-## Actor Critic
+## A3C(Asychronous Advantage Actor-Critic)
+
+### Review
+
+👉 Policy Gradient
+$$
+ \nabla \overline{R_\theta} \approx \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} (\sum_{t^{'}}^{T_n} \gamma^{t'-t} r_{t'} ^n -b)\nabla
+        \log p_\theta(a_t^n \mid s_t^n)
+$$
+其中$\,G_t^n=(\sum_{t^{'}}^{T_n} \gamma^{t'-t} r_{t'} ^n -b)\,$是不稳定的，因为在某个state执行某个action后得到的accumulated reward是有随机性的，可以认为有一个distribution，如果按照Policy Gradient的方法，就是sample这个distribution的一些数据implement在这个network上，所以它的variance可能会很大，这样model的peformance不会很好
+
+👉 要估测accumulated reward的期望值，所以有了Q-Learning
+
+State-value function $\,V^{\pi}(s)\,$
+
+State-action value function $\,Q^{\pi}(s,a)\,$
+
+### Advantage Actor-Critic (A2C)
+
+将上述两者结合 即为Actor-Critic
+$$
+    E(G_t^n) = Q^{\pi_\theta}(s_t^n,a_t^n)\\
+    b = V^{\pi_\theta}(s_t^n) \quad\text{b is baseline}
+$$
+变成
+$$
+ \nabla \overline{R_\theta} \approx \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} (Q^{\pi_\theta}(s_t^n,a_t^n) -V^{\pi_\theta}(s_t^n))\nabla
+        \log p_\theta(a_t^n \mid s_t^n)
+$$
+但是这样要估测两个network$\,Q,V\,$,根据Q和V的定义有
+$$
+    Q^{\pi_\theta}(s_t^n,a_t^n) = E[r_t^n+V^{\pi_\theta}(s_{t+1}^n)]
+$$
+在实验过程中，可以直接将期望去掉，即
+$$
+    Q^{\pi_\theta}(s_t^n,a_t^n) = r_t^n+V^{\pi_\theta}(s_{t+1}^n)
+$$
+所以将👆带入$\,\nabla \overline{R_\theta}\,$，就只需估测V这一个network
+$$
+    \nabla \overline{R_\theta} \approx \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} (r_t^n+V^{\pi_\theta}(s_{t+1}^n)-V^{\pi_\theta}(s_t^n))\nabla
+        \log p_\theta(a_t^n \mid s_t^n)
+$$
+train的步骤如👇 ![RL25](Captures\RL25.PNG "RL25")
+
+### Pathwise Derivative Policy Gradient
+
+👉 经典的actor-critic只是返回一个reward，但此种method指导actor怎么样进行action更好
+
+![RL26](Captures\RL26.PNG "RL26")
+
+![RL27](Captures\RL27.PNG "RL27")
+
+👉 和GAN很像
+
+## Sparse Reward
+
+## Imitaion Learning
