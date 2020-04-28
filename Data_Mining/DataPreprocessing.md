@@ -386,7 +386,7 @@ $$
         &= -\sum_{x\in X} p(x) \sum_{y\in Y} p(y\mid x)\log p(y\mid x)
     \end{aligned}
 $$
-信息增益：刻画已知X的基础上，需要**节约多少信息**来描述Y
+信息增益：刻画已知X的基础上，能够**节约多少信息**来描述Y
 $$
     IG(Y\mid X) = H(Y) - H(Y\mid X)
 $$
