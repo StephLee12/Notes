@@ -79,3 +79,22 @@ sys.path
     [Demo](https://blog.csdn.net/san1156/article/details/74923025)
 
     其他的安装过程按照``readme``即可
+
+5. DeepMimicCore
+
+    ``Makefile``中的四个路径
+
+    - ``EIGEN_DIR = /home/stpehlee123/dependencies/eigen-3.3.7``
+    - ``BULLET_INC_DIR = /home/stpehlee123/dependencies/bullet3-2.89/src``
+    - ``PYTHON_INC = /usr/local/python/include/python3.7m``
+    - ``PYTHON_LIB = /usr/local/python/lib/python3.7``
+
+6. 可视化
+
+    修改``args/play_motion_humanoid3d_args.txt``中的``{motion_file}``为``data/motions``中的标准动作，路径是相对路径！！！。 i.e. 一开始搞错了 一直报错``已放弃，核心已转储``
+
+7. 训练
+
+    在``DeepMimic``目录下创建一个文件夹``mkdir output``作为``model path``
+
+    训练之后，修改``args/run....txt``的``--model_files``为``output``目录下的``.ckpt``文件，不要带上后面的``data000xxx``
