@@ -1,8 +1,8 @@
 - [Time Series Analysis](#time-series-analysis)
   - [Chapter 4 平稳序列模型参数估计](#chapter-4-%e5%b9%b3%e7%a8%b3%e5%ba%8f%e5%88%97%e6%a8%a1%e5%9e%8b%e5%8f%82%e6%95%b0%e4%bc%b0%e8%ae%a1)
-    - [4.1 $AR$模型参数的矩估计](#41-math-xmlns%22httpwwww3org1998mathmathml%22semanticsmrowmiamimirmimrowannotation-encoding%22applicationx-tex%22arannotationsemanticsmathar%e6%a8%a1%e5%9e%8b%e5%8f%82%e6%95%b0%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1)
-      - [$AR(p)$自回归系数的矩估计($Yule-Walker$估计)](#math-xmlns%22httpwwww3org1998mathmathml%22semanticsmrowmiamimirmimo-stretchy%22false%22momipmimo-stretchy%22false%22momrowannotation-encoding%22applicationx-tex%22arpannotationsemanticsmatharp%e8%87%aa%e5%9b%9e%e5%bd%92%e7%b3%bb%e6%95%b0%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1math-xmlns%22httpwwww3org1998mathmathml%22semanticsmrowmiymimiumimilmimiemimo%e2%88%92momiwmimiamimilmimikmimiemimirmimrowannotation-encoding%22applicationx-tex%22yule-walkerannotationsemanticsmathyule%e2%88%92walker%e4%bc%b0%e8%ae%a1)
-      - [$AR(p)$噪声序列方差的矩估计](#math-xmlns%22httpwwww3org1998mathmathml%22semanticsmrowmiamimirmimo-stretchy%22false%22momipmimo-stretchy%22false%22momrowannotation-encoding%22applicationx-tex%22arpannotationsemanticsmatharp%e5%99%aa%e5%a3%b0%e5%ba%8f%e5%88%97%e6%96%b9%e5%b7%ae%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1)
+    - [4.1 AR模型参数的矩估计](#41-ar%e6%a8%a1%e5%9e%8b%e5%8f%82%e6%95%b0%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1)
+      - [AR(p)自回归系数的矩估计(Yule-Walker估计)](#arp%e8%87%aa%e5%9b%9e%e5%bd%92%e7%b3%bb%e6%95%b0%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1yule-walker%e4%bc%b0%e8%ae%a1)
+      - [AR(p)噪声序列方差的矩估计](#arp%e5%99%aa%e5%a3%b0%e5%ba%8f%e5%88%97%e6%96%b9%e5%b7%ae%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1)
     - [Durbin-Levinson递推估计算法](#durbin-levinson%e9%80%92%e6%8e%a8%e4%bc%b0%e8%ae%a1%e7%ae%97%e6%b3%95)
     - [4.2 $MA$模型参数的矩估计](#42-math-xmlns%22httpwwww3org1998mathmathml%22semanticsmrowmimmimiamimrowannotation-encoding%22applicationx-tex%22maannotationsemanticsmathma%e6%a8%a1%e5%9e%8b%e5%8f%82%e6%95%b0%e7%9a%84%e7%9f%a9%e4%bc%b0%e8%ae%a1)
       - [直接消元](#%e7%9b%b4%e6%8e%a5%e6%b6%88%e5%85%83)
@@ -25,11 +25,11 @@
 
 ## Chapter 4 平稳序列模型参数估计
 
-### 4.1 $AR$模型参数的矩估计
+### 4.1 AR模型参数的矩估计
 
 - 对于零均值因果自回归序列，考虑**自回归系数和噪声方差的估计**
 
-#### $AR(p)$自回归系数的矩估计($Yule-Walker$估计)
+#### AR(p)自回归系数的矩估计(Yule-Walker估计)
 
 ![AR自回归系数矩估计](..\captures/AR自回归系数矩估计.PNG "AR自回归系数矩估计")
 
@@ -37,7 +37,7 @@
 
 ![AR自回归系数矩估计3](..\captures/AR自回归系数矩估计3.PNG "AR自回归系数矩估计3")
 
-#### $AR(p)$噪声序列方差的矩估计
+#### AR(p)噪声序列方差的矩估计
 
 ![AR噪声序列方差矩估计](..\captures/AR噪声序列方差矩估计.PNG "AR噪声序列方差矩估计")
 
