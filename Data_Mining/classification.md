@@ -1,27 +1,43 @@
-- [分类](#%e5%88%86%e7%b1%bb)
-  - [决策树](#%e5%86%b3%e7%ad%96%e6%a0%91)
-    - [DT算法思想](#dt%e7%ae%97%e6%b3%95%e6%80%9d%e6%83%b3)
-    - [DT算法流程](#dt%e7%ae%97%e6%b3%95%e6%b5%81%e7%a8%8b)
-    - [DT算法伪代码](#dt%e7%ae%97%e6%b3%95%e4%bc%aa%e4%bb%a3%e7%a0%81)
-    - [属性选择度量——如何选择最优分类能力的属性](#%e5%b1%9e%e6%80%a7%e9%80%89%e6%8b%a9%e5%ba%a6%e9%87%8f%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e6%9c%80%e4%bc%98%e5%88%86%e7%b1%bb%e8%83%bd%e5%8a%9b%e7%9a%84%e5%b1%9e%e6%80%a7)
-      - [信息增益IG——ID3](#%e4%bf%a1%e6%81%af%e5%a2%9e%e7%9b%8aigid3)
-      - [信息增益率——C4.5](#%e4%bf%a1%e6%81%af%e5%a2%9e%e7%9b%8a%e7%8e%87c45)
-      - [Gini指标——CART](#gini%e6%8c%87%e6%a0%87cart)
-    - [过拟合](#%e8%bf%87%e6%8b%9f%e5%90%88)
-      - [树剪枝](#%e6%a0%91%e5%89%aa%e6%9e%9d)
-    - [从DT提取规则](#%e4%bb%8edt%e6%8f%90%e5%8f%96%e8%a7%84%e5%88%99)
+- [分类](#分类)
+  - [决策树](#决策树)
+    - [DT算法思想](#dt算法思想)
+    - [DT算法流程](#dt算法流程)
+    - [DT算法伪代码](#dt算法伪代码)
+    - [属性选择度量——如何选择最优分类能力的属性](#属性选择度量如何选择最优分类能力的属性)
+      - [信息增益IG——ID3](#信息增益igid3)
+      - [信息增益率——C4.5](#信息增益率c45)
+      - [Gini指标——CART](#gini指标cart)
+    - [过拟合](#过拟合)
+      - [树剪枝](#树剪枝)
+    - [从DT提取规则](#从dt提取规则)
   - [KNN](#knn)
-    - [KNN算法思想](#knn%e7%ae%97%e6%b3%95%e6%80%9d%e6%83%b3)
-    - [KNN优缺](#knn%e4%bc%98%e7%bc%ba)
-    - [KNN常见问题](#knn%e5%b8%b8%e8%a7%81%e9%97%ae%e9%a2%98)
-  - [朴素贝叶斯](#%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af)
-    - [贝叶斯定理](#%e8%b4%9d%e5%8f%b6%e6%96%af%e5%ae%9a%e7%90%86)
-    - [朴素贝叶斯分类器](#%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%88%86%e7%b1%bb%e5%99%a8)
-  - [SVM(支持向量机)](#svm%e6%94%af%e6%8c%81%e5%90%91%e9%87%8f%e6%9c%ba)
-    - [SVM线性分类器](#svm%e7%ba%bf%e6%80%a7%e5%88%86%e7%b1%bb%e5%99%a8)
-    - [SVM基本思想——最大间隔化](#svm%e5%9f%ba%e6%9c%ac%e6%80%9d%e6%83%b3%e6%9c%80%e5%a4%a7%e9%97%b4%e9%9a%94%e5%8c%96)
-      - [转化为最优化问题](#%e8%bd%ac%e5%8c%96%e4%b8%ba%e6%9c%80%e4%bc%98%e5%8c%96%e9%97%ae%e9%a2%98)
+    - [KNN算法思想](#knn算法思想)
+    - [KNN优缺](#knn优缺)
+    - [KNN常见问题](#knn常见问题)
+  - [朴素贝叶斯](#朴素贝叶斯)
+    - [贝叶斯定理](#贝叶斯定理)
+    - [朴素贝叶斯分类器](#朴素贝叶斯分类器)
+  - [SVM(支持向量机)](#svm支持向量机)
+    - [SVM线性分类器](#svm线性分类器)
+    - [SVM基本思想——最大间隔化](#svm基本思想最大间隔化)
+      - [转化为最优化问题](#转化为最优化问题)
   - [ANN](#ann)
+  - [集成学习](#集成学习)
+    - [Bagging](#bagging)
+      - [Bagging步骤](#bagging步骤)
+      - [随机森林RF](#随机森林rf)
+    - [Boosting](#boosting)
+    - [Stacking](#stacking)
+    - [三种集成学习的比较](#三种集成学习的比较)
+  - [分类评价](#分类评价)
+    - [混淆矩阵 Confusion Matrix](#混淆矩阵-confusion-matrix)
+    - [评价指标](#评价指标)
+      - [准确度 Accuracy](#准确度-accuracy)
+      - [误差率 Error Rate](#误差率-error-rate)
+      - [精度 Precision](#精度-precision)
+      - [召回率 Recall](#召回率-recall)
+      - [F值](#f值)
+      - [类分布不平衡——灵敏度 特效性](#类分布不平衡灵敏度-特效性)
 
 # 分类
 
@@ -273,3 +289,119 @@ $$
 👉 如何求解该**凸二次规划问题**
 
 ## ANN
+
+## 集成学习
+
+### Bagging
+
+#### Bagging步骤
+
+👉 对于包含$m$个样本的数据集
+
+- 随机抽取一个样本放入采样集，**再把该样本放回初始数据集**
+- 经过$m$次随机采样，得到含$m$个样本的采样集
+- 重复$T$次，得到$T$个采样集
+- 基于每一个采样集训练出一个基学习器，再将基学习器结合
+
+![Bagging](captures/Bagging.PNG "Bagging")
+
+#### 随机森林RF
+
+👉 与传统的DT训练相比，进行了一个改造
+
+- 在选取某个结点的分裂属性时，不是在所有属性选取，而是在候选属性集合中抽取一个子集，在其中选取分裂属性
+
+### Boosting
+
+👉 将弱学习器提升为强学习器的方法
+
+- 先训练出一个基学习器，调整样本——**提高分类错误的样本的权重**
+- 根据调整后的样本，训练下一个基学习器
+- 将训练好的所有基学习器**加权结合**
+
+![AdaBoost](captures/AdaBoost.PNG "AdaBoost")
+
+![AdaBoost2](captures/AdaBoost2.PNG "AdaBoost2")
+
+### Stacking
+
+👉 主要思想——将初级学习器的输出结果作为次级学习起的输入
+
+👉 注意：原始特征也要输入到次级学习器，因为初级学习器的输出结果只是一个**补充信息**
+
+![stacking](captures/stacking.PNG "stacking")
+
+### 三种集成学习的比较
+
+- Bagging
+  - 通过**随机抽样**增加数据和属性的多样性
+- Boosting
+  - 错误驱动
+- Stacking
+  - 从底层特征向高层特征的映射
+
+## 分类评价
+
+### 混淆矩阵 Confusion Matrix
+
+![ConfusionMatrix](captures/ConfusionMatrix.PNG "ConfusionMatrix")
+
+### 评价指标
+
+#### 准确度 Accuracy
+
+$$
+  Accuracy = \frac{TP + TN}{All}
+$$
+
+#### 误差率 Error Rate
+
+$$
+  ER  = \frac{FP + FN }{All}
+$$
+
+#### 精度 Precision
+
+👉 被分类器标记为正类的样本实际为正类的比例
+
+$$
+  precision = \frac{TP}{TP + FP}
+$$
+
+#### 召回率 Recall
+
+👉 正样本被标记为正的比例
+
+$$
+  recall = \frac{TP}{TP+FN}
+$$
+
+#### F值
+
+👉 $F_1\,$：精度和召回率的**调和平均值**
+
+$$
+  F_1 = \frac{2 \times precision \times recall}{precision + recall}
+$$
+
+👉 $F_\beta\,$：精度和召回率的加权量($\,\beta = 2 \,or\,0.5\,$)
+
+$$
+  F_\beta = \frac{(1 + \beta^2)\times precision \times recall}{\beta^2 \times precision+recall}
+$$
+
+#### 类分布不平衡——灵敏度 特效性
+
+👉 **One class may be rare**
+
+👉 灵敏度(Sensitivity)——正样本被标记为正的比例(即为召回率)
+
+$$
+  Sensitivity = \frac{TP}{TP + FN}
+$$
+
+👉 特效性(Specificity)——负样本被标记为负的比例
+
+$$
+  Specificity = \frac{TN}{FP + TN}
+$$
