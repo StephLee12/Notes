@@ -1,3 +1,11 @@
+- [Association Rule](#association-rule)
+  - [频繁项集的产生](#频繁项集的产生)
+    - [BF](#bf)
+    - [Apriori](#apriori)
+  - [规则产生](#规则产生)
+    - [FP-Growth(Frequent-Pattern Growth)](#fp-growthfrequent-pattern-growth)
+  - [关联模式的评估](#关联模式的评估)
+
 # Association Rule
 
 👉 定义

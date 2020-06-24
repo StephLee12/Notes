@@ -1,4 +1,4 @@
-- [Reinforcement Learning 李宏毅](#reinforcement-learning-%e6%9d%8e%e5%ae%8f%e6%af%85)
+- [Reinforcement Learning 李宏毅](#reinforcement-learning-李宏毅)
   - [Policy Gradient](#policy-gradient)
     - [Basic Components](#basic-components)
     - [Goal](#goal)
@@ -11,7 +11,7 @@
     - [PPO](#ppo)
   - [Q-Learning](#q-learning)
     - [State-Value Function](#state-value-function)
-    - [State-Action Value Funtion——Q Function $\,Q^\pi (s,a)\,$](#state-action-value-funtionq-function-mathsemanticsmrowmtext-mtextmsupmiqmimi%cf%80mimsupmo-stretchy%22false%22momismimo-separator%22true%22momiamimo-stretchy%22false%22momtext-mtextmrowannotation-encoding%22applicationx-tex%22qpi-saannotationsemanticsmathq%cf%80sa)
+    - [State-Action Value Funtion——Q Function $\,Q^\pi (s,a)\,$](#state-action-value-funtionq-function-mathsemanticsmrowmspace-width016667emmspacemsupmiqmimiπmimsupmomomismimo-separatortruemomiamimomomspace-width016667emmspacemrowannotation-encodingapplicationx-texqpi-saannotationsemanticsmathqπsa)
     - [Tricks](#tricks)
     - [Q-Learning Algorithm](#q-learning-algorithm)
     - [Q-Learning Tips](#q-learning-tips)
@@ -178,7 +178,7 @@ $$
 👉 从一个分布的期望到另一个分布的期望
 $$
     若f(x)不可积，可以用下面的sampling的方法计算在x\sim p(x)时f(x)的期望\\
-    E_{x\sim p} (f(x)) \approx \frac{1}{N}\sum_{i=1}^{N} f(x^i)
+    E_{x\sim p(x)} (f(x)) \approx \frac{1}{N}\sum_{i=1}^{N} f(x^i)
 $$
 但若无法从p(x)中sample$\,x^i\,$,而只能从另一个分布q(x)中sample，可以采取下面的变换
 $$
