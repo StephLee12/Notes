@@ -1,9 +1,11 @@
-- [Chapter 1](#chapter-1)
-  - [Definitions and Examples](#definitions-and-examples)
+- [Chapter 1 Definition and Examples](#chapter-1-definition-and-examples)
+  - [Definitions](#definitions)
+  - [Ramsey Theory](#ramsey-theory)
+    - [Ramsey number](#ramsey-number)
 
-# Chapter 1
+# Chapter 1 Definitions and Examples
 
-## Definitions and Examples
+## Definitions
 
 👉 边集和点集
 
@@ -72,12 +74,12 @@ $$
 
 👉 Subgraphs(子图)
 
-- $H$是$G$的子图,denoted by $H \subseteq G$，if $V(H) \subseteq V(G)$ and $E(H) \subseteq E(G)$
+- $H$是$G$的子图，denoted by $H \subseteq G$，if $V(H) \subseteq V(G)$ and $E(H) \subseteq E(G)$
 - Spanning subgraph(支撑子图,生成子图)
   - $V(H)=V(G)$
 - Induced subgraphh(导出子图)
   - $F$ is an induced subgraph of $G$ if whenever $u$ and $v$ are vertices of $F$ and $uv$ is an edge of $G$(so $uv$ is actually an edge of $F$ as well)
-  - denoted by $G[S]$
+  - denoted by $G[S]$(即图$G$由$S$导出)
 
 👉 同构(Isomorphism)
 
@@ -85,9 +87,9 @@ $$
 
 👉 Connectedness(连通性)
 
-- if $V_1 \cap V_2 = \emptyset$, **disjoint union**(不交并) $G_1 \cup G_2$(**precisely** $G_1+G_2$) is a graph with $V=V_1\cup V_2$ and $E = E_1 \cup E_2$
+- if $V_1 \cap V_2 = \emptyset$, **disjoint union**(不交并，即没有交集的并集) $G_1 \cup G_2$(**precisely** $G_1+G_2$) is a graph with $V=V_1\cup V_2$ and $E = E_1 \cup E_2$
 - 判断一个图是否是连通的
-  - it cannot b expressed as **the disjoint union of two graphs**
+  - it cannot be expressed as **the disjoint union of two graphs**
 - 连通分支
   - 任何一个不连通的图$G$都可以表示为多个连通图的**并集**,这些连通图称为$G$的**连通分支**(component)
   - 连通分支的数量 denoted by $\omega(G)$
@@ -97,12 +99,13 @@ $$
 - delete vertex $v$,the edge incident with $v$ will also be removed
 - delete edge $e$,the ends of $e$ will not be removed
 - Contraction(收缩)
-  - remove edge $e$ and **identify** its ends $v$ and $w$(将$v$和$w$重合,认为是同一个顶点), so that the **resulting vertex**(重合后的顶点) is **incident with deges which were originally incident with** $v$ or $w$
+  - remove edge $e$ and **identify** its ends $v$ and $w$(将$v$和$w$重合,认为是同一个顶点), so that the **resulting vertex**(重合后的顶点) is **incident with edges which were originally incident with** $v$ or $w$
   - note ！！！！需要在这里加一个示意图
 
 👉 邻接矩阵$A$和关联矩阵$B$
 
 - Adjacency matrix $A=[a_{ij}]_{n\times n}$
+  - pay attention to mutiple edges and loops
 
 $$
 a_{ij=}\begin{cases}
@@ -164,7 +167,7 @@ $$
 
 👉 二部图(Bipartite graphs)
 
-- if the vertexset can be split into two **disjoint sets** $A$ and $B$ so that each edge **joins** a vertex of $A$ and a vertex of $B$
+- if the vertex set can be split into two **disjoint sets** $A$ and $B$ so that each edge **joins** a vertex of $A$ and a vertex of $B$
 - Complete bipartite graph(完全二部图)
   - each vertex in $A$ is joined to each vertex in $B$ by **just one edge**
 - denoted by $K_{r,s}$ where $r$ is the number of one party's vertices and $s$ is the number of the other
@@ -190,3 +193,43 @@ $$
 $$
 Q_i \Box Q_j = Q_{i+j}
 $$
+
+👉 补图(complement)
+
+- denoted by $\overline{G}$
+- complement $\overline{G}$ is the simple graph with vertex set $V(G)$ in which two vertices are adjacent **if and only if they are not adjacent in $G$
+- 自补图**Self-complementary graph**
+  - a graph is self-complementary if it's **isomorphic**(同构) to its complement
+- Throrem
+  - Let $G$ be a simple self-complementary graph. Then $n$ $\equiv$ 0 or 1(mod 4) (即$n$模4余0或1)
+- Question $\star$
+  - give a pair of self-complementary graphs of order 5
+
+## Ramsey Theory
+
+👉 补充——鸽笼原理(The Pigeonhole Principle)
+
+- If $n+1$ objects are distributed into $n$ boxes, then at least one box contains two or more of the objects
+
+👉 Question——"Show that at any party with at least 6 people, there exists either a set of 3 mutual friends or a set fo 3 mutual strangers"
+
+- 只需要证明在6个人时 该结论成立即可
+- Proof $\star$
+
+### Ramsey number
+
+👉 Definition
+
+- Let $m$ and $n$ be two positive integers. If there exists a graph $G$ with the **smallest order** $R(m,n)$ such that $G$ has $K_m$(m阶完全图) **or** $n$ pairwise nonadjacent vertices, then $R(m,n)$ is called a Ramsey number(m,n)
+
+👉 Some Ramsey numbers
+
+- $R(3,3)=6$
+  - We already know that $R(3,3)\leq 6$, so wo need to prove that $R(3,3) > 5$, which is to show that there is **no monochromatic triangle** in $K_5$. The Ramsey numbers below use the same method to get and can use the lemmas below to constrain the upper boundary 
+- $R(3,4)=9$
+- $R(4,4)=18$
+
+👉 Lemmas
+
+- $R(m,n)$ exist for all $m,n \geq 1$ and satisfy $R(r,s) \leq R(r-1,s) + R(r,s-1)$ for all $m,n \geq 2$
+- $R(r,s) \leq R(r-1,s) + R(r,s-1) -1$ if $R(r-1,s)$ and $R(r,s)$ are both even
